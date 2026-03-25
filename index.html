@@ -359,7 +359,7 @@ footer {
 /* badge "Em breve" / "Preview" */
 .coming-badge {
   position: absolute;
-  top: 14px; right: 14px;
+  bottom: 14px; right: 14px;
   font-size: 10px; font-weight: 600; letter-spacing: .06em;
   color: var(--cinza-light); background: var(--bege-light);
   border: 1px solid var(--bege); border-radius: 20px;
@@ -627,10 +627,11 @@ function checkPassword() {
   const val = document.getElementById('modalInput').value;
   if (!currentArea) return;
   if (val === currentArea.senha) {
+    const destFile = currentArea.file; // salvar antes do closeModal zerar currentArea
     unlocked.add(currentArea.id);
     saveUnlocked();
     closeModal();
-    window.location.href = currentArea.file;
+    window.location.href = destFile;
   } else {
     const inp = document.getElementById('modalInput');
     inp.classList.add('error');
