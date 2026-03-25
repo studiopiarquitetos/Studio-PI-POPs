@@ -339,6 +339,40 @@ footer {
   .hero-eyebrow { font-size: 10px; }
   footer { padding: 20px 16px; font-size: 10px; }
 }
+
+/* ── ÁREA APAGADA (sem conteúdo ainda) ── */
+.area-dimmed {
+  opacity: .52;
+  filter: grayscale(.4);
+  cursor: default;
+  pointer-events: auto; /* mantém clique para modal de senha */
+}
+.area-dimmed:hover {
+  border-color: var(--bege) !important;
+  box-shadow: none !important;
+  transform: none !important;
+}
+.area-dimmed::before { display: none !important; }
+.area-dimmed .area-arrow { opacity: .4; }
+.area-dimmed .area-icon { filter: grayscale(1); opacity: .5; }
+
+/* badge "Em breve" / "Preview" */
+.coming-badge {
+  position: absolute;
+  top: 14px; right: 14px;
+  font-size: 10px; font-weight: 600; letter-spacing: .06em;
+  color: var(--cinza-light); background: var(--bege-light);
+  border: 1px solid var(--bege); border-radius: 20px;
+  padding: 3px 10px; pointer-events: none;
+}
+.unlocked-badge {
+  color: #4A9B6E; background: rgba(74,155,110,.08);
+  border-color: rgba(74,155,110,.25);
+}
+
+/* garantir position relative no card */
+.area-card { position: relative; }
+
 </style>
 </head>
 <body>
@@ -414,86 +448,95 @@ footer {
 </footer>
 
 <script>
-// ── SENHA POR ÁREA ──
-// null = acesso livre | string = senha necessária
-const senhas = {
-  comercial:     null,
-  preliminar:    null,
-  criativos:     null,
-  legal:         null,
-  executivos:    null,
-  financeiro:    'pi2026',   // ← protegida
-  rh:            'pi2026',   // ← protegida
-  marketing:     null,
-  documentacoes: null,
-};
-
+// ── CONFIGURAÇÃO DAS ÁREAS ──
+// ready: true = tem conteúdo, pode acessar livremente
+// ready: false = sem conteúdo ainda → aparece apagada + bloqueada com senha
+// senha: string = senha para acesso (só relevante se ready: false)
 const areas = [
   {
     id: 'CO', code: 'CO', name: 'Comercial', fullName: 'Comercial e Relacionamento',
     desc: 'Da prospecção ao acompanhamento da jornada do cliente.',
     count: 6, icon: '🤝', file: 'comercial.html',
-    accent: '#C76C4D'
+    accent: '#C76C4D', accentRgb: '199,108,77',
+    ready: true, senha: null,
+    pops: ['Prospecção', 'Reunião', 'Proposta', 'Apresentação', 'Contrato', 'Jornada']
   },
   {
     id: 'EP', code: 'EP', name: 'Etapa Preliminar', fullName: 'Etapa Preliminar',
     desc: 'Levantamento cadastral e briefing para estruturar o projeto.',
     count: 2, icon: '📐', file: 'etapa-preliminar.html',
-    accent: '#8B7355'
+    accent: '#8B7355', accentRgb: '139,115,85',
+    ready: false, senha: 'pi2026',
+    pops: ['Levantamento Cadastral', 'Reunião de Briefing']
   },
   {
     id: 'CR', code: 'CR', name: 'Criativos', fullName: 'Criativos',
     desc: 'Reunião criativa, processo de projeto, modelagem e apresentação.',
     count: 6, icon: '✏️', file: 'criativos.html',
-    accent: '#7A6A9A'
+    accent: '#7A6A9A', accentRgb: '122,106,154',
+    ready: false, senha: 'pi2026',
+    pops: ['Reunião Criativa', 'Processo Arq.', 'Interiores', 'Modelagem', 'Apresentação', 'Reunião Apres.']
   },
   {
     id: 'RE', code: 'RE', name: 'Renderização', fullName: 'Renderização',
     desc: 'Renders Enscape, IA e tour virtual dos projetos.',
     count: 3, icon: '🖼️', file: 'renderizacao.html',
-    accent: '#5A7A6A'
+    accent: '#5A7A6A', accentRgb: '90,122,106',
+    ready: false, senha: 'pi2026',
+    pops: ['Enscape', 'Renderização IA', 'Tour Virtual']
   },
   {
     id: 'PL', code: 'PL', name: 'Projeto Legal', fullName: 'Projeto Legal',
     desc: 'Modelagem, publicação e entrada junto à prefeitura (PMU).',
     count: 3, icon: '📋', file: 'projeto-legal.html',
-    accent: '#4A6A8A'
+    accent: '#4A6A8A', accentRgb: '74,106,138',
+    ready: false, senha: 'pi2026',
+    pops: ['Modelagem', 'Publicação', 'Entrada PMU']
   },
   {
     id: 'PE', code: 'PE', name: 'Proj. Executivos', fullName: 'Projetos Executivos',
     desc: 'Elétrico, hidráulico, marcenaria, pisos, esquadrias e mais.',
     count: 11, icon: '📏', file: 'projetos-executivos.html',
-    accent: '#6A8A5A'
+    accent: '#6A8A5A', accentRgb: '106,138,90',
+    ready: false, senha: 'pi2026',
+    pops: ['Elétricos', 'Luminotécnico', 'Reforma', 'Hidráulico', 'Pedras', 'Louças', 'Pisos', 'Esquadrias', 'Marcenaria', 'Eletrodomésticos', 'Mobiliário']
   },
   {
     id: 'FI', code: 'FI', name: 'Financeiro', fullName: 'Financeiro',
     desc: 'Compatibilização de receitas e controle de cobranças.',
     count: 2, icon: '💰', file: 'financeiro.html',
-    accent: '#8A6A5A'
+    accent: '#8A6A5A', accentRgb: '138,106,90',
+    ready: false, senha: 'pi2026',
+    pops: ['Compatibilização', 'Controle de Cobranças']
   },
   {
     id: 'GI', code: 'GI', name: 'Gestão Interna', fullName: 'Gestão Interna',
     desc: 'Cronograma, correções, feedback e contratação de equipe.',
     count: 4, icon: '⚙️', file: 'gestao-interna.html',
-    accent: '#6A6A8A'
+    accent: '#6A6A8A', accentRgb: '106,106,138',
+    ready: false, senha: 'pi2026',
+    pops: ['Cronograma', 'Correções', 'Feedback', 'Contratação']
   },
   {
     id: 'MA', code: 'MA', name: 'Marketing', fullName: 'Marketing',
     desc: 'Criativos para tráfego, funil de vendas e registro de obra.',
     count: 3, icon: '📣', file: 'marketing.html',
-    accent: '#9A6A7A'
+    accent: '#9A6A7A', accentRgb: '154,106,122',
+    ready: false, senha: 'pi2026',
+    pops: ['Criativos Tráfego', 'Funil de Vendas', 'Registro de Obra']
   },
   {
     id: 'DO', code: 'DO', name: 'Documentações', fullName: 'Documentações',
     desc: 'Nomenclaturas, estrutura de pastas e patrimônio.',
     count: 3, icon: '📁', file: 'documentacoes.html',
-    accent: '#6A8A9A'
+    accent: '#6A8A9A', accentRgb: '106,138,154',
+    ready: false, senha: 'pi2026',
+    pops: ['Nomenclaturas', 'Estrutura de Pastas', 'Patrimônio']
   },
 ];
 
-// session unlocks
+// session unlocks (para não pedir senha de novo na mesma sessão)
 const unlocked = new Set(JSON.parse(sessionStorage.getItem('unlocked')||'[]'));
-
 function saveUnlocked(){ sessionStorage.setItem('unlocked', JSON.stringify([...unlocked])); }
 
 // ── RENDER ──
@@ -501,18 +544,39 @@ function renderAreas(list) {
   const grid = document.getElementById('areasGrid');
   grid.innerHTML = '';
   list.forEach(area => {
-    const locked = senhas[area.id] && !unlocked.has(area.id);
+    // Lógica de estado:
+    // ready: true → acesso livre, card vibrante
+    // ready: false, desbloqueado na sessão → pode acessar
+    // ready: false, não desbloqueado → apagado + cadeado + clique pede senha
+    const sessionUnlocked = unlocked.has(area.id);
+    const canAccess = area.ready || sessionUnlocked;
+    const dimmed = !area.ready && !sessionUnlocked;
+
     const card = document.createElement('div');
-    card.className = 'area-card';
-    card.style.setProperty('--area-color', area.color);
-    card.style.setProperty('--area-bg', area.bg);
-    card.onclick = () => locked ? openModal(area) : window.location.href = area.file;
+    card.className = 'area-card' + (dimmed ? ' area-dimmed' : '');
+
+    // cor de acento: vibrante se pronto, neutra se apagado
+    const accentColor = dimmed ? '#B5AFA8' : area.accent;
+    const accentBg = dimmed ? 'rgba(181,175,168,.08)' : `rgba(${area.accentRgb},.08)`;
+    card.style.setProperty('--area-color', accentColor);
+    card.style.setProperty('--area-bg', accentBg);
+
+    card.onclick = () => {
+      if (canAccess) {
+        window.location.href = area.file;
+      } else {
+        openModal(area);
+      }
+    };
 
     const chips = area.pops.slice(0,4).map(p=>`<span class="pop-chip">${p}</span>`).join('')
       + (area.pops.length > 4 ? `<span class="pop-chip">+${area.pops.length-4}</span>` : '');
 
+    const statusBadge = dimmed
+      ? `<div class="coming-badge">🔒 Em breve</div>`
+      : (area.ready ? '' : `<div class="coming-badge unlocked-badge">🔓 Preview</div>`);
+
     card.innerHTML = `
-      ${locked ? '<div class="lock-badge">🔒</div>' : ''}
       <div class="area-card-top">
         <div class="area-icon">${area.icon}</div>
         <div class="area-badge">${area.code}</div>
@@ -523,8 +587,9 @@ function renderAreas(list) {
       </div>
       <div class="area-card-footer">
         <div class="pops-chips">${chips}</div>
-        <div class="area-arrow">${locked ? '🔒' : '→'}</div>
-      </div>`;
+        <div class="area-arrow">${dimmed ? '🔒' : '→'}</div>
+      </div>
+      ${statusBadge}`;
     grid.appendChild(card);
   });
 }
@@ -533,8 +598,10 @@ function filterAreas(query) {
   const q = query.toLowerCase().trim();
   if (!q) { renderAreas(areas); return; }
   renderAreas(areas.filter(a =>
-    a.name.toLowerCase().includes(q) || a.code.toLowerCase().includes(q) ||
-    a.desc.toLowerCase().includes(q) || a.pops.some(p => p.toLowerCase().includes(q))
+    a.name.toLowerCase().includes(q) ||
+    a.code.toLowerCase().includes(q) ||
+    a.desc.toLowerCase().includes(q) ||
+    a.pops.some(p => p.toLowerCase().includes(q))
   ));
 }
 
@@ -559,7 +626,7 @@ function closeModal() {
 function checkPassword() {
   const val = document.getElementById('modalInput').value;
   if (!currentArea) return;
-  if (val === senhas[currentArea.id]) {
+  if (val === currentArea.senha) {
     unlocked.add(currentArea.id);
     saveUnlocked();
     closeModal();
@@ -578,7 +645,6 @@ function toggleEye() {
   document.getElementById('eyeBtn').textContent = inp.type === 'password' ? '👁' : '🙈';
 }
 
-// fechar modal clicando fora
 document.getElementById('modalOverlay').addEventListener('click', e => {
   if (e.target === document.getElementById('modalOverlay')) closeModal();
 });
